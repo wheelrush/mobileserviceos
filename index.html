@@ -1544,9 +1544,9 @@
 
                 <div class="nav-center-spacer"></div>
 
-                <div class="nav-item" data-view="inventory" aria-label="Inventory" role="button" tabindex="0">
-                    <span class="material-icons">inventory_2</span>
-                    <span>Inventory</span>
+                <div class="nav-item" data-view="services" aria-label="Services" role="button" tabindex="0">
+                    <span class="material-icons">miscellaneous_services</span>
+                    <span>Services</span>
                 </div>
 
                 <div class="nav-item" data-view="more" aria-label="More options" role="button" tabindex="0">
@@ -1598,6 +1598,12 @@
         serverTimestamp,
         Timestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+        getStorage,
+        ref as storageRef,
+        uploadBytes,
+        getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     // ─── Firebase Configuration ─────────────────────────────────────────
     const firebaseConfig = {
@@ -1616,6 +1622,7 @@
 
     const auth     = getAuth(app);
     const db       = getFirestore(app);
+    const storage  = getStorage(app);
     const provider = new GoogleAuthProvider();
 
     // Make available globally for debugging
@@ -1624,6 +1631,56 @@
     window.firebaseDB   = db;
 
     console.log('Firebase initialized — project:', firebaseConfig.projectId);
+
+    // ─── Business Type Templates ────────────────────────────────────────
+    const BUSINESS_TYPES = {
+        mobile_mechanic:  { label: 'Mobile Mechanic', icon: 'build', services: [
+            { name: 'Oil Change', basePrice: 75, minProfit: 25, icon: 'oil_barrel', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Brake Service', basePrice: 150, minProfit: 40, icon: 'speed', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Battery Replacement', basePrice: 120, minProfit: 35, icon: 'battery_charging_full', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Diagnostics', basePrice: 90, minProfit: 30, icon: 'troubleshoot', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Radiator Service', basePrice: 180, minProfit: 50, icon: 'thermostat', perMile: true, heavyDuty: false, tireRelated: false }
+        ]},
+        mobile_tire: { label: 'Mobile Tire Service', icon: 'tire_repair', services: [
+            { name: 'Flat Tire Repair', basePrice: 60, minProfit: 25, icon: 'build', perMile: true, heavyDuty: false, tireRelated: true },
+            { name: 'Tire Replacement', basePrice: 40, minProfit: 30, icon: 'swap_horiz', perMile: true, heavyDuty: false, tireRelated: true },
+            { name: 'Mount & Balance', basePrice: 80, minProfit: 30, icon: 'tire_repair', perMile: true, heavyDuty: false, tireRelated: true },
+            { name: 'Tire Rotation', basePrice: 45, minProfit: 20, icon: 'sync', perMile: false, heavyDuty: false, tireRelated: true },
+            { name: 'Tractor-Trailer Service', basePrice: 150, minProfit: 50, icon: 'local_shipping', perMile: true, heavyDuty: true, tireRelated: true }
+        ]},
+        roadside: { label: 'Roadside Assistance', icon: 'car_crash', services: [
+            { name: 'Jump Start', basePrice: 50, minProfit: 20, icon: 'bolt', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Fuel Delivery', basePrice: 55, minProfit: 15, icon: 'local_gas_station', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Lockout Service', basePrice: 65, minProfit: 25, icon: 'lock_open', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Tire Change', basePrice: 55, minProfit: 20, icon: 'tire_repair', perMile: true, heavyDuty: false, tireRelated: true }
+        ]},
+        mobile_detailing: { label: 'Mobile Detailing', icon: 'local_car_wash', services: [
+            { name: 'Interior Detail', basePrice: 120, minProfit: 40, icon: 'auto_awesome', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Exterior Wash', basePrice: 60, minProfit: 20, icon: 'local_car_wash', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Full Detail', basePrice: 200, minProfit: 60, icon: 'star', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Ceramic Coating', basePrice: 350, minProfit: 100, icon: 'shield', perMile: true, heavyDuty: false, tireRelated: false }
+        ]},
+        mobile_locksmith: { label: 'Mobile Locksmith', icon: 'lock_open', services: [
+            { name: 'Car Lockout', basePrice: 75, minProfit: 30, icon: 'car_crash', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'House Lockout', basePrice: 65, minProfit: 25, icon: 'home', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Key Replacement', basePrice: 120, minProfit: 40, icon: 'key', perMile: true, heavyDuty: false, tireRelated: false }
+        ]},
+        towing: { label: 'Towing Service', icon: 'local_shipping', services: [
+            { name: 'Local Tow', basePrice: 100, minProfit: 35, icon: 'local_shipping', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Long Distance Tow', basePrice: 250, minProfit: 80, icon: 'route', perMile: true, heavyDuty: true, tireRelated: false },
+            { name: 'Winch Service', basePrice: 150, minProfit: 50, icon: 'settings', perMile: true, heavyDuty: true, tireRelated: false }
+        ]},
+        hvac: { label: 'HVAC (AC Repair)', icon: 'ac_unit', services: [
+            { name: 'AC Repair', basePrice: 150, minProfit: 45, icon: 'ac_unit', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'AC Installation', basePrice: 300, minProfit: 80, icon: 'construction', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Maintenance Service', basePrice: 100, minProfit: 30, icon: 'handyman', perMile: true, heavyDuty: false, tireRelated: false }
+        ]},
+        pressure_washing: { label: 'Pressure Washing', icon: 'water_drop', services: [
+            { name: 'Driveway Cleaning', basePrice: 120, minProfit: 35, icon: 'water_drop', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'House Wash', basePrice: 200, minProfit: 60, icon: 'house', perMile: true, heavyDuty: false, tireRelated: false },
+            { name: 'Roof Cleaning', basePrice: 250, minProfit: 70, icon: 'roofing', perMile: true, heavyDuty: false, tireRelated: false }
+        ]}
+    };
 
     // ─── Firestore Helpers (modular SDK with compat-style chaining) ────
     // Wrapper that lets existing code call userRef('jobs').orderBy(...).limit(...).get()
@@ -1697,18 +1754,7 @@
             websiteLink: '',
             setupComplete: false,
             role: 'owner',
-            services: [
-                { id: 's1', name: 'Flat Tire Repair', icon: 'build', basePrice: 60, minProfit: 25, enabled: true, perMile: true, heavyDuty: false, tireRelated: true },
-                { id: 's2', name: 'Tire Replacement', icon: 'swap_horiz', basePrice: 40, minProfit: 30, enabled: true, perMile: true, heavyDuty: false, tireRelated: true },
-                { id: 's3', name: 'Mobile Tire Service', icon: 'tire_repair', basePrice: 50, minProfit: 25, enabled: true, perMile: true, heavyDuty: true, tireRelated: true },
-                { id: 's4', name: 'Roadside Assistance', icon: 'car_crash', basePrice: 75, minProfit: 30, enabled: true, perMile: true, heavyDuty: false, tireRelated: false },
-                { id: 's5', name: 'Tractor-Trailer Service', icon: 'local_shipping', basePrice: 150, minProfit: 50, enabled: true, perMile: true, heavyDuty: true, tireRelated: true },
-                { id: 's6', name: 'Spare Tire Change', icon: 'autorenew', basePrice: 55, minProfit: 20, enabled: true, perMile: true, heavyDuty: false, tireRelated: true },
-                { id: 's7', name: 'Tire Rotation', icon: 'sync', basePrice: 45, minProfit: 20, enabled: true, perMile: false, heavyDuty: false, tireRelated: true },
-                { id: 's8', name: 'Jump Start', icon: 'bolt', basePrice: 50, minProfit: 20, enabled: true, perMile: true, heavyDuty: false, tireRelated: false },
-                { id: 's9', name: 'Fuel Delivery', icon: 'local_gas_station', basePrice: 55, minProfit: 15, enabled: true, perMile: true, heavyDuty: false, tireRelated: false },
-                { id: 's10', name: 'Lockout Service', icon: 'lock_open', basePrice: 65, minProfit: 25, enabled: true, perMile: true, heavyDuty: false, tireRelated: false }
-            ],
+            services: [],
             expenseCategories: ['Fuel', 'Tires/Parts', 'Tools', 'Vehicle Maintenance', 'Insurance', 'Marketing', 'Phone/Internet', 'Software', 'Other']
         }
     };
@@ -1949,6 +1995,7 @@
                 case 'dashboard': renderDashboard(); break;
                 case 'jobs': renderJobs(); break;
                 case 'newjob': renderJobForm(); break;
+                case 'services': renderServices(); break;
                 case 'inventory': renderInventory(); break;
                 case 'expenses': renderExpenses(); break;
                 case 'customers': renderCustomers(); break;
@@ -1980,18 +2027,53 @@
     });
 
     // ─── Onboarding ─────────────────────────────────────────────────────
+    let _obSelectedType = 'mobile_tire';
+    let _obStep = 1;
+
     function renderOnboarding() {
+        _obStep = 1;
+        _obSelectedType = APP.settings?.businessType || 'mobile_tire';
         const main = document.getElementById('mainContent');
         main.innerHTML = `
-        <div class="view-container" style="max-width:560px;margin:0 auto;">
+        <div class="view-container" style="max-width:640px;margin:0 auto;">
             <div style="text-align:center;margin-bottom:32px;">
                 <span class="material-icons" style="font-size:48px;color:var(--primary);">rocket_launch</span>
                 <h2 style="margin-top:12px;">Welcome to Mobile Service OS</h2>
                 <p style="color:var(--text-secondary);margin-top:8px;">Let's set up your business in a few quick steps.</p>
             </div>
-            <div id="onboardSteps">
-                <div class="card" id="obStep1">
-                    <h3 style="margin-bottom:16px;">Business Info</h3>
+            <div id="onboardContent"></div>
+        </div>`;
+        renderOnboardStep();
+    }
+
+    function renderOnboardStep() {
+        const el = document.getElementById('onboardContent');
+        if (!el) return;
+        if (_obStep === 1) {
+            el.innerHTML = `
+                <div class="card">
+                    <h3 style="margin-bottom:16px;">What type of business do you run?</h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;" id="typeCards">
+                        ${Object.entries(BUSINESS_TYPES).map(([key, bt]) => `
+                            <div class="card type-card ${key === _obSelectedType ? 'selected' : ''}" data-type="${key}" onclick="selectBusinessType('${key}')" style="cursor:pointer;text-align:center;padding:20px 12px;border:2px solid ${key === _obSelectedType ? 'var(--primary)' : 'var(--border)'};transition:all 0.2s;">
+                                <span class="material-icons" style="font-size:36px;color:${key === _obSelectedType ? 'var(--primary)' : 'var(--text-secondary)'};">${bt.icon}</span>
+                                <div style="font-weight:600;margin-top:8px;font-size:0.9rem;">${bt.label}</div>
+                                <div style="font-size:0.75rem;color:var(--text-tertiary);margin-top:4px;">${bt.services.length} services</div>
+                            </div>`).join('')}
+                    </div>
+                    <div style="display:flex;gap:12px;margin-top:24px;">
+                        <button class="btn btn-secondary" style="flex:1;" onclick="skipOnboarding()">Skip Setup</button>
+                        <button class="btn btn-primary" style="flex:1;" onclick="nextOnboardStep()">
+                            <span class="material-icons">arrow_forward</span> Next
+                        </button>
+                    </div>
+                </div>`;
+        } else if (_obStep === 2) {
+            const bt = BUSINESS_TYPES[_obSelectedType];
+            el.innerHTML = `
+                <div class="card">
+                    <h3 style="margin-bottom:4px;">Business Details</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:16px;">Setting up as: <strong style="color:var(--primary);">${bt?.label || 'Service Business'}</strong></p>
                     <div class="form-group">
                         <label>Business Name *</label>
                         <input type="text" id="obName" value="${escHtml(APP.settings.businessName)}" placeholder="Your Business Name" required>
@@ -2001,16 +2083,7 @@
                         <input type="tel" id="obPhone" value="${escHtml(APP.settings.phone)}" placeholder="(555) 123-4567">
                     </div>
                     <div class="form-group">
-                        <label>Business Type</label>
-                        <select id="obType">
-                            <option value="mobile_tire" ${APP.settings.businessType === 'mobile_tire' ? 'selected' : ''}>Mobile Tire Service</option>
-                            <option value="roadside" ${APP.settings.businessType === 'roadside' ? 'selected' : ''}>Roadside Assistance</option>
-                            <option value="mobile_mechanic" ${APP.settings.businessType === 'mobile_mechanic' ? 'selected' : ''}>Mobile Mechanic</option>
-                            <option value="general_mobile" ${APP.settings.businessType === 'general_mobile' ? 'selected' : ''}>General Mobile Service</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Base Location (where you operate from)</label>
+                        <label>Base Location</label>
                         <input type="text" id="obBase" value="${escHtml(APP.settings.baseLocation)}" placeholder="e.g. East Hartford, CT">
                     </div>
                     <div class="form-row" style="grid-template-columns:1fr 1fr;">
@@ -2027,36 +2100,73 @@
                         <label>Google Review Link (optional)</label>
                         <input type="url" id="obReview" value="${escHtml(APP.settings.reviewLink)}" placeholder="https://g.page/...">
                     </div>
-                    <div style="display:flex;gap:12px;margin-top:20px;">
-                        <button class="btn btn-secondary" style="flex:1;" onclick="skipOnboarding()">Skip Setup</button>
+
+                    <h4 style="margin-top:20px;margin-bottom:12px;color:var(--accent);">Your Services (from ${bt?.label || 'template'})</h4>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        ${(bt?.services || []).map((s, i) => `
+                            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg-tertiary);border-radius:var(--radius-sm);">
+                                <span class="material-icons" style="color:var(--primary);font-size:20px;">${s.icon || 'build'}</span>
+                                <span style="flex:1;font-weight:500;">${escHtml(s.name)}</span>
+                                <span style="color:var(--accent);font-size:0.85rem;">$${s.basePrice}</span>
+                            </div>`).join('')}
+                    </div>
+                    <p style="color:var(--text-tertiary);font-size:0.8rem;margin-top:8px;">You can customize these later in Services.</p>
+
+                    <div style="display:flex;gap:12px;margin-top:24px;">
+                        <button class="btn btn-secondary" style="flex:1;" onclick="prevOnboardStep()">
+                            <span class="material-icons">arrow_back</span> Back
+                        </button>
                         <button class="btn btn-primary" style="flex:1;" onclick="finishOnboarding()">
-                            <span class="material-icons">check</span> Finish Setup
+                            <span class="material-icons">check</span> Launch My Business
                         </button>
                     </div>
-                </div>
-            </div>
-        </div>`;
+                </div>`;
+        }
     }
 
+    function selectBusinessType(type) {
+        _obSelectedType = type;
+        document.querySelectorAll('.type-card').forEach(c => {
+            const isSelected = c.dataset.type === type;
+            c.classList.toggle('selected', isSelected);
+            c.style.borderColor = isSelected ? 'var(--primary)' : 'var(--border)';
+            c.querySelector('.material-icons').style.color = isSelected ? 'var(--primary)' : 'var(--text-secondary)';
+        });
+    }
+
+    function nextOnboardStep() { _obStep = 2; renderOnboardStep(); }
+    function prevOnboardStep() { _obStep = 1; renderOnboardStep(); }
+
     async function skipOnboarding() {
-        await settingsRef().update({ setupComplete: true });
+        // Give them default mobile_tire services so app isn't empty
+        const defaultSvcs = (BUSINESS_TYPES.mobile_tire?.services || []).map((s, i) => ({
+            id: 's' + (i + 1), ...s, enabled: true
+        }));
+        await settingsRef().update({ setupComplete: true, services: defaultSvcs, businessType: 'mobile_tire' });
         APP.settings.setupComplete = true;
+        APP.settings.services = defaultSvcs;
+        APP.settings.businessType = 'mobile_tire';
         navigateTo('dashboard');
         showToast('Setup skipped. You can configure everything in Settings.', 'info');
     }
 
     async function finishOnboarding() {
-        const name = document.getElementById('obName').value.trim();
+        const name = document.getElementById('obName')?.value?.trim();
         if (!name) { showToast('Please enter a business name.', 'warning'); return; }
         showLoading();
+        const bt = BUSINESS_TYPES[_obSelectedType];
+        const services = (bt?.services || []).map((s, i) => ({
+            id: 's' + (i + 1), ...s, enabled: true
+        }));
         const updates = {
             businessName: name,
-            phone: document.getElementById('obPhone').value.trim(),
-            businessType: document.getElementById('obType').value,
-            baseLocation: document.getElementById('obBase').value.trim(),
-            freeMiles: Number(document.getElementById('obFreeMiles').value) || 10,
-            perMileRate: Number(document.getElementById('obPerMile').value) || 3,
-            reviewLink: document.getElementById('obReview').value.trim(),
+            phone: document.getElementById('obPhone')?.value?.trim() || '',
+            businessType: _obSelectedType,
+            baseLocation: document.getElementById('obBase')?.value?.trim() || '',
+            freeMiles: Number(document.getElementById('obFreeMiles')?.value) || 10,
+            perMileRate: Number(document.getElementById('obPerMile')?.value) || 3,
+            reviewLink: document.getElementById('obReview')?.value?.trim() || '',
+            services: services,
             setupComplete: true
         };
         try {
@@ -2325,7 +2435,13 @@
     function getServiceIcon(name) {
         if (!name) return 'build';
         const svc = (APP.settings?.services || []).find(s => s.name === name);
-        return svc?.icon || 'build';
+        if (svc?.icon) return svc.icon;
+        // Fallback: search all business type templates
+        for (const bt of Object.values(BUSINESS_TYPES)) {
+            const found = bt.services.find(s => s.name === name);
+            if (found?.icon) return found.icon;
+        }
+        return 'build';
     }
 
     // ─── JOB FORM (New/Edit) ────────────────────────────────────────────
@@ -2874,6 +2990,169 @@
             showToast('Job deleted.', 'info');
             navigateTo('jobs');
         } catch (err) { showToast('Error deleting job.', 'error'); }
+    }
+
+    // ─── SERVICES VIEW ────────────────────────────────────────────────────
+    function renderServices() {
+        const services = APP.settings?.services || [];
+        const main = document.getElementById('mainContent');
+        main.innerHTML = `
+        <div class="view-container" style="max-width:700px;margin:0 auto;">
+            <div class="view-header">
+                <h2>Services</h2>
+                <button class="btn btn-sm btn-primary" onclick="addServiceFromView()"><span class="material-icons">add</span> Add</button>
+            </div>
+            <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:16px;">Manage the services your business offers. These appear in your job form and quick quote.</p>
+            <div id="svcViewList">
+                ${services.length === 0 ? `
+                    <div class="empty-state">
+                        <span class="material-icons" style="font-size:48px;color:var(--text-tertiary);">miscellaneous_services</span>
+                        <p class="empty-state-title">No services configured</p>
+                        <p class="empty-state-description">Add services or pick a business type template to get started.</p>
+                        <button class="btn btn-primary" onclick="loadTemplateServices()"><span class="material-icons">auto_awesome</span> Load Template</button>
+                    </div>` :
+                services.map((s, i) => `
+                    <div class="card" style="margin-bottom:10px;padding:14px;display:flex;align-items:center;gap:12px;">
+                        <span class="material-icons" style="font-size:28px;color:${s.enabled ? 'var(--primary)' : 'var(--text-tertiary)'};">${escHtml(s.icon || 'build')}</span>
+                        <div style="flex:1;">
+                            <div style="font-weight:600;${!s.enabled ? 'opacity:0.5;' : ''}">${escHtml(s.name)}</div>
+                            <div style="font-size:0.8rem;color:var(--text-secondary);">Base: ${money(s.basePrice)} · Min Profit: ${money(s.minProfit)}${s.tireRelated ? ' · <span style="color:var(--accent);">Tire</span>' : ''}${s.heavyDuty ? ' · <span style="color:var(--warning);">HD</span>' : ''}</div>
+                        </div>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <div class="toggle ${s.enabled ? 'active' : ''}" onclick="toggleServiceEnabled(${i})" style="cursor:pointer;"></div>
+                            <button class="btn-icon" style="width:36px;height:36px;background:none;border:none;color:var(--text-secondary);" onclick="editServiceFromView(${i})"><span class="material-icons" style="font-size:20px;">edit</span></button>
+                            <button class="btn-icon" style="width:36px;height:36px;background:none;border:none;color:var(--danger);" onclick="deleteServiceFromView(${i})"><span class="material-icons" style="font-size:20px;">delete</span></button>
+                        </div>
+                    </div>`).join('')}
+            </div>
+            ${services.length > 0 ? `
+                <div style="margin-top:16px;display:flex;gap:12px;">
+                    <button class="btn btn-secondary" style="flex:1;" onclick="loadTemplateServices()"><span class="material-icons">auto_awesome</span> Load Template</button>
+                    <button class="btn btn-secondary" style="flex:1;" onclick="navigateTo('inventory')"><span class="material-icons">inventory_2</span> Inventory</button>
+                </div>` : ''}
+        </div>`;
+    }
+
+    async function toggleServiceEnabled(idx) {
+        const services = APP.settings?.services || [];
+        if (!services[idx]) return;
+        services[idx].enabled = !services[idx].enabled;
+        try {
+            await settingsRef().update({ services });
+            renderServices();
+        } catch { showToast('Error updating service.', 'error'); }
+    }
+
+    function addServiceFromView() {
+        openModal('Add Service', `
+            <form id="svcEditForm">
+                <div class="form-group"><label>Service Name *</label><input type="text" id="sefName" required placeholder="e.g. Oil Change"></div>
+                <div class="form-row" style="grid-template-columns:1fr 1fr;">
+                    <div class="form-group"><label>Base Price ($)</label><input type="number" id="sefBase" value="50" min="0" step="1"></div>
+                    <div class="form-group"><label>Min Profit ($)</label><input type="number" id="sefMin" value="25" min="0"></div>
+                </div>
+                <div class="form-group"><label>Icon (Material Icon name)</label><input type="text" id="sefIcon" value="build" placeholder="e.g. build, bolt, star"></div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                    <label class="toggle-label"><input type="checkbox" id="sefPerMile" checked><span class="toggle"></span> Per-mile charge</label>
+                    <label class="toggle-label"><input type="checkbox" id="sefHeavy"><span class="toggle"></span> Heavy-duty option</label>
+                    <label class="toggle-label"><input type="checkbox" id="sefTire"><span class="toggle"></span> Tire-related</label>
+                </div>
+                <div style="display:flex;gap:12px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;">Add Service</button>
+                </div>
+            </form>`);
+        document.getElementById('svcEditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('sefName').value.trim();
+            if (!name) { showToast('Service name is required.', 'warning'); return; }
+            const svc = {
+                id: 's' + Date.now(), name, enabled: true,
+                basePrice: Number(document.getElementById('sefBase').value) || 50,
+                minProfit: Number(document.getElementById('sefMin').value) || 25,
+                icon: document.getElementById('sefIcon').value.trim() || 'build',
+                perMile: document.getElementById('sefPerMile').checked,
+                heavyDuty: document.getElementById('sefHeavy').checked,
+                tireRelated: document.getElementById('sefTire').checked
+            };
+            APP.settings.services.push(svc);
+            try { await settingsRef().update({ services: APP.settings.services }); closeModal(); renderServices(); showToast('Service added!', 'success'); }
+            catch { showToast('Error adding service.', 'error'); }
+        });
+    }
+
+    function editServiceFromView(idx) {
+        const s = APP.settings?.services?.[idx];
+        if (!s) return;
+        openModal('Edit Service', `
+            <form id="svcEditForm">
+                <div class="form-group"><label>Service Name *</label><input type="text" id="sefName" value="${escHtml(s.name)}" required></div>
+                <div class="form-row" style="grid-template-columns:1fr 1fr;">
+                    <div class="form-group"><label>Base Price ($)</label><input type="number" id="sefBase" value="${s.basePrice || 50}" min="0" step="1"></div>
+                    <div class="form-group"><label>Min Profit ($)</label><input type="number" id="sefMin" value="${s.minProfit || 25}" min="0"></div>
+                </div>
+                <div class="form-group"><label>Icon</label><input type="text" id="sefIcon" value="${escHtml(s.icon || 'build')}"></div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                    <label class="toggle-label"><input type="checkbox" id="sefPerMile" ${s.perMile ? 'checked' : ''}><span class="toggle"></span> Per-mile</label>
+                    <label class="toggle-label"><input type="checkbox" id="sefHeavy" ${s.heavyDuty ? 'checked' : ''}><span class="toggle"></span> Heavy-duty</label>
+                    <label class="toggle-label"><input type="checkbox" id="sefTire" ${s.tireRelated ? 'checked' : ''}><span class="toggle"></span> Tire</label>
+                </div>
+                <div style="display:flex;gap:12px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes</button>
+                </div>
+            </form>`);
+        document.getElementById('svcEditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            APP.settings.services[idx] = {
+                ...s,
+                name: document.getElementById('sefName').value.trim() || s.name,
+                basePrice: Number(document.getElementById('sefBase').value) || s.basePrice,
+                minProfit: Number(document.getElementById('sefMin').value) || s.minProfit,
+                icon: document.getElementById('sefIcon').value.trim() || s.icon,
+                perMile: document.getElementById('sefPerMile').checked,
+                heavyDuty: document.getElementById('sefHeavy').checked,
+                tireRelated: document.getElementById('sefTire').checked
+            };
+            try { await settingsRef().update({ services: APP.settings.services }); closeModal(); renderServices(); showToast('Service updated!', 'success'); }
+            catch { showToast('Error.', 'error'); }
+        });
+    }
+
+    async function deleteServiceFromView(idx) {
+        if (!confirm('Remove this service?')) return;
+        APP.settings.services.splice(idx, 1);
+        try { await settingsRef().update({ services: APP.settings.services }); renderServices(); showToast('Service removed.', 'info'); }
+        catch { showToast('Error.', 'error'); }
+    }
+
+    function loadTemplateServices() {
+        const currentType = APP.settings?.businessType || 'mobile_tire';
+        const typeOptions = Object.entries(BUSINESS_TYPES).map(([key, bt]) =>
+            `<option value="${key}" ${key === currentType ? 'selected' : ''}>${bt.label} (${bt.services.length} services)</option>`
+        ).join('');
+        openModal('Load Service Template', `
+            <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:16px;">This will replace your current services with the selected template.</p>
+            <div class="form-group"><label>Business Type</label><select id="templateType">${typeOptions}</select></div>
+            <div style="display:flex;gap:12px;">
+                <button class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" style="flex:1;" onclick="applyTemplate()"><span class="material-icons">auto_awesome</span> Apply Template</button>
+            </div>`);
+    }
+
+    async function applyTemplate() {
+        const type = document.getElementById('templateType')?.value;
+        const bt = BUSINESS_TYPES[type];
+        if (!bt) return;
+        const services = bt.services.map((s, i) => ({ id: 's' + (i + 1), ...s, enabled: true }));
+        try {
+            await settingsRef().update({ services, businessType: type });
+            APP.settings.services = services;
+            APP.settings.businessType = type;
+            closeModal();
+            renderServices();
+            showToast(`Loaded ${bt.label} template with ${services.length} services!`, 'success');
+        } catch { showToast('Error applying template.', 'error'); }
     }
 
     // ─── INVENTORY ──────────────────────────────────────────────────────
@@ -3666,6 +3945,11 @@
         <div class="view-container">
             <div class="view-header"><h2>More</h2></div>
             <div style="display:flex;flex-direction:column;gap:10px;">
+                <div class="card list-item" style="cursor:pointer;" onclick="navigateTo('inventory')">
+                    <span class="material-icons" style="color:var(--primary);margin-right:12px;">inventory_2</span>
+                    <span style="font-weight:600;">Inventory</span>
+                    <span class="material-icons" style="margin-left:auto;color:var(--text-tertiary);">chevron_right</span>
+                </div>
                 <div class="card list-item" style="cursor:pointer;" onclick="navigateTo('expenses')">
                     <span class="material-icons" style="color:var(--warning);margin-right:12px;">receipt</span>
                     <span style="font-weight:600;">Expenses</span>
@@ -3727,14 +4011,22 @@
                         <div class="form-group"><label>Email</label><input type="email" id="sBizEmail" value="${escHtml(s.email || '')}"></div>
                     </div>
                     <div class="form-group"><label>Base Location</label><input type="text" id="sBizBase" value="${escHtml(s.baseLocation || '')}"></div>
-                    <div class="form-group"><label>Logo URL</label><input type="url" id="sBizLogo" value="${escHtml(s.logoUrl || '')}" placeholder="https://..."></div>
+                    <div class="form-group">
+                        <label>Logo</label>
+                        ${s.logoUrl ? `<div style="margin-bottom:8px;"><img src="${escHtml(s.logoUrl)}" alt="Logo" style="max-height:60px;border-radius:8px;border:1px solid var(--border);"></div>` : ''}
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="file" id="logoFileInput" accept="image/*" style="display:none;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('logoFileInput').click()"><span class="material-icons">upload</span> Upload Logo</button>
+                            <span id="logoUploadStatus" style="font-size:0.8rem;color:var(--text-tertiary);"></span>
+                        </div>
+                        <input type="hidden" id="sBizLogo" value="${escHtml(s.logoUrl || '')}">
+                    </div>
                     <div class="form-group"><label>Website</label><input type="url" id="sBizWeb" value="${escHtml(s.websiteLink || '')}"></div>
                     <div class="form-group"><label>Business Type</label>
                         <select id="sBizType">
-                            <option value="mobile_tire" ${s.businessType === 'mobile_tire' ? 'selected' : ''}>Mobile Tire Service</option>
-                            <option value="roadside" ${s.businessType === 'roadside' ? 'selected' : ''}>Roadside Assistance</option>
-                            <option value="mobile_mechanic" ${s.businessType === 'mobile_mechanic' ? 'selected' : ''}>Mobile Mechanic</option>
-                            <option value="general_mobile" ${s.businessType === 'general_mobile' ? 'selected' : ''}>General Mobile Service</option>
+                            ${Object.entries(BUSINESS_TYPES).map(([key, bt]) =>
+                                `<option value="${key}" ${s.businessType === key ? 'selected' : ''}>${bt.label}</option>`
+                            ).join('')}
                         </select>
                     </div>
                 </div>
@@ -3836,6 +4128,28 @@
                 tab.classList.add('active');
                 document.getElementById('tab-' + tab.dataset.tab)?.classList.add('active');
             });
+        });
+
+        // Logo upload handler
+        document.getElementById('logoFileInput')?.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { showToast('Logo must be under 2MB.', 'warning'); return; }
+            const status = document.getElementById('logoUploadStatus');
+            if (status) status.textContent = 'Uploading...';
+            try {
+                const path = `users/${uid()}/logo_${Date.now()}.${file.name.split('.').pop()}`;
+                const ref = storageRef(storage, path);
+                await uploadBytes(ref, file);
+                const url = await getDownloadURL(ref);
+                document.getElementById('sBizLogo').value = url;
+                if (status) status.textContent = 'Uploaded!';
+                showToast('Logo uploaded! Save settings to apply.', 'success');
+            } catch (err) {
+                console.error('Logo upload error:', err);
+                if (status) status.textContent = 'Upload failed';
+                showToast('Error uploading logo. Make sure Firebase Storage is enabled.', 'error');
+            }
         });
 
         // Render services list
@@ -3970,7 +4284,11 @@
         // Navigation
         navigateTo, closeModal,
         // Onboarding
-        skipOnboarding, finishOnboarding,
+        skipOnboarding, finishOnboarding, selectBusinessType,
+        nextOnboardStep, prevOnboardStep,
+        // Services View
+        addServiceFromView, editServiceFromView, deleteServiceFromView,
+        toggleServiceEnabled, loadTemplateServices, applyTemplate,
         // Jobs
         viewJob, editJobById, completeJob, deleteJob, createInvoiceFromJob,
         // Inventory
