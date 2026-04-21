@@ -235,6 +235,12 @@
             text-decoration: none;
             white-space: nowrap;
             gap: 8px;
+            min-height: 44px;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            position: relative;
+            z-index: 1;
         }
 
         .btn-primary {
@@ -245,12 +251,11 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
             box-shadow: 0 6px 24px rgba(108, 92, 231, 0.4);
         }
 
         .btn-primary:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
 
         .btn-secondary {
@@ -265,15 +270,18 @@
         }
 
         .btn-icon {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
+            min-height: 44px;
             padding: 0;
             border-radius: 50%;
+            flex-shrink: 0;
         }
 
-        .btn-small {
+        .btn-small, .btn-sm {
             padding: 8px 16px;
             font-size: 0.875rem;
+            min-height: 36px;
         }
 
         .btn-danger {
@@ -289,6 +297,20 @@
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Action button rows — prevent overlap */
+        .action-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .action-row .btn {
+            flex: 1 1 auto;
+            min-width: 100px;
+            width: auto;
         }
 
         /* Auth Links */
@@ -404,15 +426,15 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 64px;
-            background: linear-gradient(180deg, rgba(20, 20, 31, 0.95) 0%, rgba(20, 20, 31, 1) 100%);
+            height: calc(60px + max(0px, env(safe-area-inset-bottom)));
+            background: rgba(14, 14, 22, 0.98);
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-around;
-            align-items: flex-start;
-            padding-bottom: max(0, env(safe-area-inset-bottom));
-            backdrop-filter: blur(10px);
-            z-index: 99;
+            align-items: center;
+            padding-bottom: max(0px, env(safe-area-inset-bottom));
+            backdrop-filter: blur(12px);
+            z-index: 100;
         }
 
         .nav-item {
@@ -421,55 +443,63 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 2px;
             color: var(--text-secondary);
-            padding: 8px 0;
+            padding: 6px 0;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: color var(--transition-fast);
             position: relative;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
+            letter-spacing: 0.3px;
+            min-height: 48px;
+            touch-action: manipulation;
         }
 
         .nav-item.active {
             color: var(--primary);
         }
+        .nav-item.active .material-icons {
+            text-shadow: 0 0 12px rgba(108, 92, 231, 0.5);
+        }
 
         .nav-item .material-icons {
-            font-size: 24px;
+            font-size: 22px;
         }
 
         .nav-center-spacer {
-            width: 60px;
+            width: 56px;
+            flex-shrink: 0;
         }
 
         /* Floating Action Button */
         .fab {
             position: fixed;
-            bottom: calc(20px + max(0, env(safe-area-inset-bottom)));
+            bottom: calc(30px + max(0px, env(safe-area-inset-bottom)));
             left: 50%;
             transform: translateX(-50%);
-            width: 56px;
-            height: 56px;
+            width: 52px;
+            height: 52px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            border: none;
+            border: 3px solid var(--bg-primary);
             border-radius: 50%;
             color: white;
-            font-size: 28px;
+            font-size: 26px;
             cursor: pointer;
-            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4);
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 98;
+            z-index: 101;
             transition: all var(--transition);
+            touch-action: manipulation;
         }
 
         .fab:active {
-            transform: translateX(-50%) scale(0.95);
+            transform: translateX(-50%) scale(0.9);
         }
 
         .fab:hover {
-            box-shadow: 0 12px 32px rgba(108, 92, 231, 0.5);
+            box-shadow: 0 8px 28px rgba(108, 92, 231, 0.6);
         }
 
         /* Cards */
@@ -712,39 +742,48 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 16px;
-            margin-bottom: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             cursor: pointer;
-            transition: all var(--transition);
+            transition: border-color var(--transition-fast);
+            touch-action: manipulation;
         }
 
-        .list-item:hover {
-            border-color: var(--primary);
-            box-shadow: var(--shadow-sm);
+        .list-item:hover, .list-item:active {
+            border-color: rgba(108, 92, 231, 0.4);
         }
 
         .list-item-left {
             flex: 1;
+            min-width: 0;
         }
 
         .list-item-title {
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .list-item-subtitle {
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .list-item-right {
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-shrink: 0;
         }
 
         /* Empty State */
@@ -789,7 +828,7 @@
             backdrop-filter: blur(4px);
             display: flex;
             align-items: flex-end;
-            z-index: 1000;
+            z-index: 1100;
             animation: fadeIn 0.3s var(--transition);
         }
 
@@ -802,9 +841,9 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-            padding: 24px 16px;
-            padding-bottom: calc(24px + max(0, env(safe-area-inset-bottom)));
-            max-height: 90vh;
+            padding: 20px 16px;
+            padding-bottom: calc(20px + max(0, env(safe-area-inset-bottom)));
+            max-height: 85vh;
             overflow-y: auto;
             animation: slideUp 0.4s var(--transition);
         }
@@ -813,11 +852,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            position: sticky;
+            top: -20px;
+            background: var(--bg-secondary);
+            padding-top: 4px;
+            z-index: 2;
         }
 
         .modal-title {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 600;
         }
 
@@ -828,16 +872,34 @@
             cursor: pointer;
             font-size: 24px;
             padding: 0;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
+            min-height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: color var(--transition);
+            flex-shrink: 0;
         }
 
         .modal-close:hover {
             color: var(--text-primary);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .modal-footer .btn {
+            flex: 1 1 auto;
+            min-width: 90px;
+            width: auto;
+            font-size: 0.85rem;
+            padding: 10px 14px;
         }
 
         /* Toast Notifications */
@@ -998,13 +1060,16 @@
         /* Toggle Switch */
         .toggle {
             position: relative;
-            width: 48px;
-            height: 28px;
+            width: 44px;
+            height: 26px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 13px;
             cursor: pointer;
             transition: all var(--transition);
+            flex-shrink: 0;
+            display: inline-block;
+            vertical-align: middle;
         }
 
         .toggle.active {
@@ -1015,17 +1080,33 @@
         .toggle::after {
             content: '';
             position: absolute;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             background: white;
             border-radius: 50%;
             top: 1px;
-            left: 2px;
+            left: 1px;
             transition: left var(--transition);
         }
 
         .toggle.active::after {
-            left: 21px;
+            left: 19px;
+        }
+
+        /* Toggle label — prevents overlap */
+        .toggle-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            min-height: 36px;
+            padding: 4px 0;
+            white-space: nowrap;
+        }
+        .toggle-label input[type="checkbox"] {
+            display: none;
         }
 
         /* Input Group */
@@ -1113,11 +1194,39 @@
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 12px;
+            align-items: start;
         }
 
         .form-row.single {
             grid-template-columns: 1fr;
+        }
+
+        /* Form group spacing fix */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+
+        /* Fix select dropdown on mobile */
+        .form-group select {
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238888a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        /* Fix textarea */
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
         }
 
         /* Price Breakdown */
@@ -1544,9 +1653,9 @@
 
                 <div class="nav-center-spacer"></div>
 
-                <div class="nav-item" data-view="services" aria-label="Services" role="button" tabindex="0">
-                    <span class="material-icons">miscellaneous_services</span>
-                    <span>Services</span>
+                <div class="nav-item" data-view="expenses" aria-label="Expenses" role="button" tabindex="0">
+                    <span class="material-icons">receipt</span>
+                    <span>Expenses</span>
                 </div>
 
                 <div class="nav-item" data-view="more" aria-label="More options" role="button" tabindex="0">
@@ -1561,6 +1670,9 @@
             </button>
         </div>
     </div>
+
+    <!-- jsPDF for professional invoice PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 
     <!-- MAIN APPLICATION SCRIPT (Firebase Modular SDK + App Logic) -->
     <script type="module">
@@ -2182,16 +2294,19 @@
     }
 
     // ─── DASHBOARD ──────────────────────────────────────────────────────
+    function todayStart() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+
     async function renderDashboard() {
         const main = document.getElementById('mainContent');
-        main.innerHTML = `<div class="view-container"><div class="view-header"><h2>Dashboard</h2><p style="color:var(--text-secondary);">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p></div><div id="dashContent"><div style="text-align:center;padding:40px;"><div class="spinner"></div><p style="margin-top:12px;color:var(--text-secondary);">Loading dashboard...</p></div></div></div>`;
+        main.innerHTML = `<div class="view-container"><div class="view-header"><h2>${escHtml(APP.settings?.businessName || 'Dashboard')}</h2><p style="color:var(--text-secondary);font-size:0.85rem;">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p></div><div id="dashContent"><div style="text-align:center;padding:40px;"><div class="spinner"></div></div></div></div>`;
 
         try {
+            const ts = todayStart();
             const ws = weekStart();
             const ms = monthStart();
             const [jobsSnap, expSnap, invSnap, invAllSnap] = await Promise.all([
-                userRef('jobs').orderBy('createdAt', 'desc').limit(100).get(),
-                userRef('expenses').orderBy('date', 'desc').limit(100).get(),
+                userRef('jobs').orderBy('createdAt', 'desc').limit(200).get(),
+                userRef('expenses').orderBy('date', 'desc').limit(200).get(),
                 userRef('inventory').get(),
                 userRef('invoices').orderBy('createdAt', 'desc').limit(50).get()
             ]);
@@ -2200,155 +2315,181 @@
             const inventory = invSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             const invoices = invAllSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-            const weekJobs = jobs.filter(j => {
-                const d = j.createdAt?.toDate ? j.createdAt.toDate() : new Date(j.createdAt);
-                return d >= ws;
-            });
+            // Helper to get date from firestore timestamp or string
+            const toDate = (d) => d?.toDate ? d.toDate() : new Date(d);
+
+            // Today stats
+            const todayJobs = jobs.filter(j => j.createdAt && toDate(j.createdAt) >= ts);
+            const todayCompleted = todayJobs.filter(j => j.status === 'completed');
+            const todayRevenue = todayCompleted.reduce((s, j) => s + (Number(j.finalPrice) || 0), 0);
+            const todayMaterials = todayCompleted.reduce((s, j) => s + (Number(j.materialCost) || 0), 0);
+            const todayPending = todayJobs.filter(j => j.status === 'pending_payment' || j.status === 'scheduled').length;
+            const todayExpenses = expenses.filter(e => e.date && toDate(e.date) >= ts).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+            const todayProfit = todayRevenue - todayMaterials - todayExpenses;
+            const todayUnpaid = invoices.filter(i => i.status === 'unpaid' && i.createdAt && toDate(i.createdAt) >= ts);
+
+            // Week stats
+            const weekJobs = jobs.filter(j => j.createdAt && toDate(j.createdAt) >= ws);
             const completedWeek = weekJobs.filter(j => j.status === 'completed');
             const weekRevenue = completedWeek.reduce((s, j) => s + (Number(j.finalPrice) || 0), 0);
             const weekMaterials = completedWeek.reduce((s, j) => s + (Number(j.materialCost) || 0), 0);
-            const weekExpenses = expenses.filter(e => {
-                const d = e.date?.toDate ? e.date.toDate() : new Date(e.date);
-                return d >= ws;
-            }).reduce((s, e) => s + (Number(e.amount) || 0), 0);
-            const monthExpenses = expenses.filter(e => {
-                const d = e.date?.toDate ? e.date.toDate() : new Date(e.date);
-                return d >= ms;
-            }).reduce((s, e) => s + (Number(e.amount) || 0), 0);
-            const weekGross = weekRevenue - weekMaterials;
-            const weekNet = weekGross - weekExpenses;
+            const weekExpenses = expenses.filter(e => e.date && toDate(e.date) >= ws).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+            const weekProfit = weekRevenue - weekMaterials - weekExpenses;
 
-            const pending = jobs.filter(j => j.status === 'pending_payment' || j.status === 'scheduled').length;
-            const active = jobs.filter(j => j.status === 'in_progress').length;
-            const completed = jobs.filter(j => j.status === 'completed').length;
+            // Month stats
+            const monthJobs = jobs.filter(j => j.createdAt && toDate(j.createdAt) >= ms);
+            const completedMonth = monthJobs.filter(j => j.status === 'completed');
+            const monthRevenue = completedMonth.reduce((s, j) => s + (Number(j.finalPrice) || 0), 0);
+            const monthMaterials = completedMonth.reduce((s, j) => s + (Number(j.materialCost) || 0), 0);
+            const monthExpenses = expenses.filter(e => e.date && toDate(e.date) >= ms).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+            const monthProfit = monthRevenue - monthMaterials - monthExpenses;
+
             const lowStock = inventory.filter(i => (Number(i.quantity) || 0) <= (Number(i.lowStockThreshold) || 3)).length;
             const unpaidInvoices = invoices.filter(i => i.status === 'unpaid');
             const unpaidTotal = unpaidInvoices.reduce((s, i) => s + (Number(i.amount) || 0), 0);
-
             const recentJobs = jobs.slice(0, 5);
 
-            // Service breakdown
-            const serviceStats = {};
-            completedWeek.forEach(j => {
-                const svc = j.serviceType || 'Other';
-                if (!serviceStats[svc]) serviceStats[svc] = { count: 0, revenue: 0 };
-                serviceStats[svc].count++;
-                serviceStats[svc].revenue += Number(j.finalPrice) || 0;
-            });
+            // Quick quote services
+            const services = (APP.settings?.services || []).filter(s => s.enabled);
 
             const dc = document.getElementById('dashContent');
             dc.innerHTML = `
-                <div class="dashboard-grid">
-                    <div class="card metric-card">
-                        <div class="metric-label">Weekly Revenue</div>
-                        <div class="metric-value" style="color:var(--success);">${money(weekRevenue)}</div>
-                        <div class="metric-sub">${completedWeek.length} completed jobs</div>
+                <!-- TODAY PROGRESS -->
+                <div style="margin-bottom:6px;"><h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-tertiary);">Today</h3></div>
+                <div class="dashboard-grid" style="grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:8px;padding:0;margin-bottom:16px;">
+                    <div class="card metric-card" style="padding:12px 8px;">
+                        <div class="metric-label" style="font-size:0.65rem;">Revenue</div>
+                        <div class="metric-value" style="font-size:1.3rem;color:var(--success);margin:4px 0;">${money(todayRevenue)}</div>
                     </div>
-                    <div class="card metric-card">
-                        <div class="metric-label">Gross Profit</div>
-                        <div class="metric-value" style="color:var(--accent);">${money(weekGross)}</div>
-                        <div class="metric-sub">After materials</div>
+                    <div class="card metric-card" style="padding:12px 8px;">
+                        <div class="metric-label" style="font-size:0.65rem;">Jobs</div>
+                        <div class="metric-value" style="font-size:1.3rem;margin:4px 0;">${todayJobs.length}</div>
                     </div>
-                    <div class="card metric-card">
-                        <div class="metric-label">Net Profit</div>
-                        <div class="metric-value" style="color:${weekNet >= 0 ? 'var(--success)' : 'var(--danger)'};">${money(weekNet)}</div>
-                        <div class="metric-sub">After expenses</div>
+                    <div class="card metric-card" style="padding:12px 8px;">
+                        <div class="metric-label" style="font-size:0.65rem;">Done</div>
+                        <div class="metric-value" style="font-size:1.3rem;color:var(--accent);margin:4px 0;">${todayCompleted.length}</div>
                     </div>
-                    <div class="card metric-card">
-                        <div class="metric-label">Expenses</div>
-                        <div class="metric-value" style="color:var(--warning);">${money(weekExpenses)}</div>
-                        <div class="metric-sub">This week · ${money(monthExpenses)} this month</div>
+                    <div class="card metric-card" style="padding:12px 8px;">
+                        <div class="metric-label" style="font-size:0.65rem;">Pending</div>
+                        <div class="metric-value" style="font-size:1.3rem;color:var(--warning);margin:4px 0;">${todayPending}</div>
+                    </div>
+                    <div class="card metric-card" style="padding:12px 8px;">
+                        <div class="metric-label" style="font-size:0.65rem;">Expenses</div>
+                        <div class="metric-value" style="font-size:1.3rem;color:var(--danger);margin:4px 0;">${money(todayExpenses)}</div>
+                    </div>
+                    <div class="card metric-card" style="padding:12px 8px;">
+                        <div class="metric-label" style="font-size:0.65rem;">Profit</div>
+                        <div class="metric-value" style="font-size:1.3rem;color:${todayProfit >= 0 ? 'var(--success)' : 'var(--danger)'};margin:4px 0;">${money(todayProfit)}</div>
                     </div>
                 </div>
 
-                <div class="dashboard-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-top:16px;">
-                    <div class="card metric-card" style="cursor:pointer;" onclick="navigateTo('jobs')">
-                        <div class="metric-label">Pending</div>
-                        <div class="metric-value">${pending}</div>
+                <!-- THIS WEEK / MONTH -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                    <div class="card" style="padding:14px;">
+                        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-tertiary);margin-bottom:8px;">This Week</div>
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);font-size:0.8rem;">Revenue</span><span style="font-weight:600;color:var(--success);font-size:0.85rem;">${money(weekRevenue)}</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);font-size:0.8rem;">Expenses</span><span style="font-weight:600;color:var(--danger);font-size:0.85rem;">${money(weekExpenses)}</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0 0;border-top:1px solid var(--border);margin-top:4px;"><span style="color:var(--text-primary);font-size:0.85rem;font-weight:600;">Profit</span><span style="font-weight:700;color:${weekProfit >= 0 ? 'var(--success)' : 'var(--danger)'};font-size:0.95rem;">${money(weekProfit)}</span></div>
                     </div>
-                    <div class="card metric-card" style="cursor:pointer;" onclick="navigateTo('jobs')">
-                        <div class="metric-label">Active</div>
-                        <div class="metric-value" style="color:var(--primary);">${active}</div>
-                    </div>
-                    <div class="card metric-card" style="cursor:pointer;" onclick="navigateTo('jobs')">
-                        <div class="metric-label">Completed</div>
-                        <div class="metric-value" style="color:var(--success);">${completed}</div>
-                    </div>
-                    <div class="card metric-card" style="cursor:pointer;" onclick="navigateTo('inventory')">
-                        <div class="metric-label">Low Stock</div>
-                        <div class="metric-value" style="color:${lowStock > 0 ? 'var(--danger)' : 'var(--text-secondary)'};">${lowStock}</div>
+                    <div class="card" style="padding:14px;">
+                        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-tertiary);margin-bottom:8px;">This Month</div>
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);font-size:0.8rem;">Revenue</span><span style="font-weight:600;color:var(--success);font-size:0.85rem;">${money(monthRevenue)}</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);font-size:0.8rem;">Expenses</span><span style="font-weight:600;color:var(--danger);font-size:0.85rem;">${money(monthExpenses)}</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0 0;border-top:1px solid var(--border);margin-top:4px;"><span style="color:var(--text-primary);font-size:0.85rem;font-weight:600;">Profit</span><span style="font-weight:700;color:${monthProfit >= 0 ? 'var(--success)' : 'var(--danger)'};font-size:0.95rem;">${money(monthProfit)}</span></div>
                     </div>
                 </div>
 
                 ${unpaidInvoices.length > 0 ? `
-                <div class="card" style="margin-top:16px;border-left:3px solid var(--warning);">
+                <div class="card" style="margin-bottom:16px;border-left:3px solid var(--warning);padding:12px 14px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <div>
-                            <h4 style="color:var(--warning);"><span class="material-icons" style="font-size:18px;vertical-align:middle;">receipt_long</span> Outstanding Invoices</h4>
-                            <p style="color:var(--text-secondary);font-size:0.875rem;margin-top:4px;">${unpaidInvoices.length} unpaid · Total: ${money(unpaidTotal)}</p>
-                        </div>
-                        <button class="btn btn-sm btn-secondary" onclick="navigateTo('invoices')">View All</button>
+                        <div><span class="material-icons" style="font-size:16px;vertical-align:middle;color:var(--warning);">receipt_long</span> <strong style="font-size:0.9rem;">${unpaidInvoices.length} Unpaid</strong> <span style="color:var(--text-secondary);font-size:0.85rem;">· ${money(unpaidTotal)}</span></div>
+                        <button class="btn btn-sm btn-secondary" style="min-height:32px;padding:4px 12px;" onclick="navigateTo('invoices')">View</button>
                     </div>
                 </div>` : ''}
 
-                <div class="card" style="margin-top:16px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                        <h3>Quick Actions</h3>
-                    </div>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
-                        <button class="btn btn-primary" onclick="navigateTo('newjob')" style="font-size:0.85rem;"><span class="material-icons">add</span> New Job</button>
-                        <button class="btn btn-secondary" onclick="navigateTo('quotes')" style="font-size:0.85rem;"><span class="material-icons">calculate</span> Quick Quote</button>
-                        <button class="btn btn-secondary" onclick="navigateTo('inventory')" style="font-size:0.85rem;"><span class="material-icons">inventory_2</span> Stock</button>
-                        <button class="btn btn-secondary" onclick="navigateTo('expenses')" style="font-size:0.85rem;"><span class="material-icons">receipt</span> Expense</button>
-                    </div>
-                </div>
-
-                ${Object.keys(serviceStats).length > 0 ? `
-                <div class="card" style="margin-top:16px;">
-                    <h3 style="margin-bottom:12px;">Service Performance (This Week)</h3>
-                    ${Object.entries(serviceStats).sort((a,b) => b[1].revenue - a[1].revenue).map(([name, s]) => `
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
-                            <span>${escHtml(name)}</span>
-                            <div style="text-align:right;">
-                                <span style="color:var(--success);font-weight:600;">${money(s.revenue)}</span>
-                                <span style="color:var(--text-secondary);font-size:0.8rem;margin-left:8px;">${s.count} jobs</span>
-                            </div>
-                        </div>`).join('')}
-                </div>` : ''}
-
-                <div class="card" style="margin-top:16px;">
+                <!-- QUICK QUOTE -->
+                ${services.length > 0 ? `
+                <div class="card" style="margin-bottom:16px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                        <h3>Recent Jobs</h3>
-                        <button class="btn btn-sm btn-secondary" onclick="navigateTo('jobs')">View All</button>
+                        <h3 style="font-size:1rem;"><span class="material-icons" style="font-size:18px;vertical-align:middle;color:var(--accent);">calculate</span> Quick Quote</h3>
                     </div>
-                    ${recentJobs.length === 0 ? '<p class="empty-state-text">No jobs yet. Create your first job!</p>' :
+                    <div class="form-row" style="grid-template-columns:1fr auto;gap:8px;align-items:end;">
+                        <div class="form-group" style="margin:0;">
+                            <select id="dashQQSvc" style="padding:10px 12px;font-size:0.85rem;">
+                                ${services.map(s => `<option value="${escHtml(s.name)}" data-base="${s.basePrice}" data-min="${s.minProfit}">${escHtml(s.name)}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <input type="number" id="dashQQMiles" placeholder="Miles" value="0" min="0" style="padding:10px 12px;font-size:0.85rem;width:80px;">
+                        </div>
+                    </div>
+                    <div id="dashQQResult" style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:10px 14px;background:var(--bg-tertiary);border-radius:var(--radius-sm);">
+                        <span style="color:var(--text-secondary);font-size:0.85rem;">Suggested Price</span>
+                        <span id="dashQQPrice" style="font-weight:700;font-size:1.2rem;color:var(--accent);">$0.00</span>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <button class="btn btn-primary btn-sm" style="flex:1;" onclick="dashQuickToJob()"><span class="material-icons">add</span> Create Job</button>
+                        <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="navigateTo('quotes')">Full Quote</button>
+                    </div>
+                </div>` : ''}
+
+                <!-- QUICK ACTIONS -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+                    <button class="btn btn-primary" onclick="navigateTo('newjob')" style="font-size:0.85rem;padding:14px 12px;"><span class="material-icons">add</span> New Job</button>
+                    <button class="btn btn-secondary" onclick="navigateTo('expenses')" style="font-size:0.85rem;padding:14px 12px;"><span class="material-icons">receipt</span> Add Expense</button>
+                </div>
+
+                <!-- RECENT JOBS -->
+                <div class="card" style="margin-bottom:16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <h3 style="font-size:1rem;">Recent Jobs</h3>
+                        <button class="btn btn-sm btn-secondary" style="min-height:32px;padding:4px 12px;" onclick="navigateTo('jobs')">All</button>
+                    </div>
+                    ${recentJobs.length === 0 ? '<p style="color:var(--text-tertiary);text-align:center;padding:20px 0;font-size:0.875rem;">No jobs yet — tap + to create your first!</p>' :
                     recentJobs.map(j => `
-                        <div class="list-item" onclick="viewJob('${j.id}')" style="cursor:pointer;">
-                            <div style="flex:1;">
-                                <div style="font-weight:600;">${escHtml(j.serviceType || 'Service')}</div>
-                                <div style="font-size:0.85rem;color:var(--text-secondary);">${escHtml(j.customerName || 'Walk-in')} · ${escHtml(j.location || '')}</div>
+                        <div class="list-item" onclick="viewJob('${j.id}')">
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-weight:600;font-size:0.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(j.serviceType || 'Service')}</div>
+                                <div style="font-size:0.8rem;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(j.customerName || 'Walk-in')} · ${escHtml(j.location || '')}</div>
                             </div>
-                            <div style="text-align:right;">
-                                <div style="font-weight:600;color:var(--success);">${money(j.finalPrice)}</div>
-                                <span class="badge badge-${statusBadge(j.status)}">${statusLabel(j.status)}</span>
+                            <div style="text-align:right;flex-shrink:0;">
+                                <div style="font-weight:700;color:var(--success);">${money(j.finalPrice)}</div>
+                                <span class="badge badge-${statusBadge(j.status)}" style="font-size:0.6rem;padding:2px 8px;">${statusLabel(j.status)}</span>
                             </div>
                         </div>`).join('')}
                 </div>
 
-                ${APP.settings.reviewLink ? `
-                <div class="card" style="margin-top:16px;text-align:center;">
-                    <span class="material-icons" style="font-size:32px;color:var(--warning);">star</span>
-                    <h4 style="margin-top:8px;">Request a Review</h4>
-                    <p style="color:var(--text-secondary);font-size:0.875rem;margin-top:4px;">Send customers your review link after great service.</p>
-                    <button class="btn btn-primary" style="margin-top:12px;" onclick="generateReviewRequest()">
-                        <span class="material-icons">share</span> Generate Review Request
-                    </button>
-                </div>` : ''}
+                ${lowStock > 0 ? `<div class="card" style="margin-bottom:16px;border-left:3px solid var(--danger);padding:12px 14px;cursor:pointer;" onclick="navigateTo('inventory')"><span class="material-icons" style="font-size:16px;vertical-align:middle;color:var(--danger);">warning</span> <strong style="font-size:0.9rem;">${lowStock} items low on stock</strong></div>` : ''}
             `;
+
+            // Setup dashboard quick quote
+            const qqCalc = () => {
+                const sel = document.getElementById('dashQQSvc');
+                if (!sel) return;
+                const opt = sel.options[sel.selectedIndex];
+                const base = Number(opt?.dataset?.base) || 0;
+                const miles = Number(document.getElementById('dashQQMiles')?.value) || 0;
+                const freeMi = APP.settings?.freeMiles || 10;
+                const perMi = APP.settings?.perMileRate || 3;
+                const travel = Math.max(0, miles - freeMi) * perMi;
+                const price = base + travel;
+                const el = document.getElementById('dashQQPrice');
+                if (el) el.textContent = money(price);
+            };
+            document.getElementById('dashQQSvc')?.addEventListener('change', qqCalc);
+            document.getElementById('dashQQMiles')?.addEventListener('input', qqCalc);
+            qqCalc();
+
         } catch (err) {
             console.error('Dashboard error:', err);
             document.getElementById('dashContent').innerHTML = '<div class="card"><p style="color:var(--danger);">Error loading dashboard. Please try again.</p></div>';
         }
+    }
+
+    function dashQuickToJob() {
+        const svc = document.getElementById('dashQQSvc')?.value || '';
+        const miles = Number(document.getElementById('dashQQMiles')?.value) || 0;
+        renderJobForm({ serviceType: svc, milesFromBase: miles });
     }
 
     function statusBadge(s) {
@@ -2955,7 +3096,11 @@
                 </div>`,
                 `<button class="btn btn-secondary" onclick="editJobById('${j.id}')"><span class="material-icons">edit</span> Edit</button>
                 <button class="btn btn-primary" onclick="createInvoiceFromJob('${j.id}')"><span class="material-icons">receipt</span> Invoice</button>
-                ${j.status !== 'completed' ? `<button class="btn btn-success" onclick="completeJob('${j.id}')"><span class="material-icons">check</span> Complete</button>` : ''}
+                ${j.status !== 'completed' ? `<button class="btn btn-success" onclick="completeJob('${j.id}')"><span class="material-icons">check</span> Complete</button>` : `
+                <button class="btn btn-success" onclick="afterJobMarkPaid('${j.id}')"><span class="material-icons">payments</span> ${j.paymentStatus === 'paid' ? 'Paid ✓' : 'Mark Paid'}</button>
+                <button class="btn btn-secondary" onclick="afterJobReview('${j.id}')"><span class="material-icons">star</span> Review</button>
+                <button class="btn btn-secondary" onclick="afterJobFollowUp('${j.id}')"><span class="material-icons">event_repeat</span> Follow-Up</button>`}
+                <button class="btn btn-secondary" onclick="afterJobShare('${j.id}')"><span class="material-icons">share</span></button>
                 <button class="btn btn-danger" onclick="deleteJob('${j.id}')"><span class="material-icons">delete</span></button>`
             );
         } catch (err) { showToast('Error loading job.', 'error'); }
@@ -2978,8 +3123,165 @@
             if (job.tireSize) await deductInventory(job.tireSize, job.tireQty || 1);
             closeModal();
             showToast('Job completed!', 'success');
-            navigateTo('jobs');
+            showAfterJobActions(id, { id, ...job });
         } catch (err) { showToast('Error completing job.', 'error'); }
+    }
+
+    function showAfterJobActions(jobId, job) {
+        const biz = APP.settings || {};
+        const custName = job.customerName || 'Customer';
+        const custPhone = job.customerPhone || '';
+        const amount = money(Number(job.finalPrice) || 0);
+        openModal('Job Complete — Next Steps', `
+            <div style="text-align:center;margin-bottom:16px;">
+                <span class="material-icons" style="font-size:48px;color:var(--success);">check_circle</span>
+                <h3 style="margin:8px 0 4px;">${escHtml(job.serviceType || 'Job')} — ${amount}</h3>
+                <p style="color:var(--text-secondary);font-size:0.875rem;">${escHtml(custName)}${custPhone ? ' · ' + escHtml(custPhone) : ''}</p>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <button class="btn btn-primary" onclick="afterJobInvoice('${jobId}')" style="width:100%;">
+                    <span class="material-icons">receipt_long</span> Send Invoice PDF
+                </button>
+                <button class="btn btn-secondary" onclick="afterJobReview('${jobId}')" style="width:100%;">
+                    <span class="material-icons">star</span> Send Review Request
+                </button>
+                <button class="btn btn-success" onclick="afterJobMarkPaid('${jobId}')" style="width:100%;">
+                    <span class="material-icons">payments</span> Mark as Paid
+                </button>
+                <button class="btn btn-secondary" onclick="afterJobShare('${jobId}')" style="width:100%;">
+                    <span class="material-icons">share</span> Share Invoice
+                </button>
+                <button class="btn btn-secondary" onclick="afterJobFollowUp('${jobId}')" style="width:100%;">
+                    <span class="material-icons">event_repeat</span> Create Follow-Up
+                </button>
+                <button class="btn" onclick="closeModal();navigateTo('jobs');" style="width:100%;background:var(--surface);color:var(--text-secondary);border:1px solid var(--border);">
+                    Done — Back to Jobs
+                </button>
+            </div>`, '');
+    }
+
+    async function afterJobInvoice(jobId) {
+        closeModal();
+        showLoading();
+        try {
+            // Check if invoice already exists for this job
+            const existing = await userRef('invoices').where('jobId', '==', jobId).limit(1).get();
+            let invoiceId;
+            if (existing.docs.length > 0) {
+                invoiceId = existing.docs[0].id;
+            } else {
+                const doc = await userRef('jobs').doc(jobId).get();
+                const j = doc.data();
+                const invNum = 'INV-' + Date.now().toString(36).toUpperCase();
+                const data = {
+                    invoiceNumber: invNum, jobId, customerName: j.customerName || '',
+                    customerPhone: j.customerPhone || '', serviceType: j.serviceType || '',
+                    location: j.location || '', tireSize: j.tireSize || '',
+                    amount: Number(j.finalPrice) || 0, materialCost: Number(j.materialCost) || 0,
+                    notes: j.notes || '', status: 'unpaid', createdAt: serverTimestamp()
+                };
+                const ref = await userRef('invoices').add(data);
+                invoiceId = ref.id;
+            }
+            hideLoading();
+            await generateInvoicePDF(invoiceId);
+        } catch (err) {
+            hideLoading();
+            showToast('Error creating invoice.', 'error');
+        }
+    }
+
+    async function afterJobReview(jobId) {
+        try {
+            const doc = await userRef('jobs').doc(jobId).get();
+            const j = doc.data() || {};
+            const biz = APP.settings || {};
+            if (!biz.reviewLink) { showToast('Set your Google review link in Settings first.', 'warning'); return; }
+            const custName = j.customerName || 'there';
+            const custPhone = j.customerPhone || '';
+            const msg = `Hi ${custName}! Thank you for choosing ${biz.businessName || 'us'}! If you had a great experience, we'd really appreciate a quick review:\n${biz.reviewLink}\n\nThank you for your business!`;
+            closeModal();
+            openModal('Send Review Request', `
+                <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:12px;">Customize your review request message:</p>
+                <textarea id="reviewMsg" rows="5" style="width:100%;">${escHtml(msg)}</textarea>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+                    <button class="btn btn-primary" style="flex:1;min-width:120px;" onclick="copyReviewMsg()"><span class="material-icons">content_copy</span> Copy</button>
+                    ${custPhone ? `<a class="btn btn-success" style="flex:1;min-width:120px;text-decoration:none;text-align:center;" href="sms:${escHtml(custPhone)}?body=${encodeURIComponent(msg)}"><span class="material-icons">sms</span> Text</a>` : ''}
+                    <button class="btn btn-secondary" style="flex:1;min-width:120px;" onclick="shareReviewMsg()"><span class="material-icons">share</span> Share</button>
+                </div>
+                <button class="btn" onclick="closeModal();showAfterJobActions('${jobId}', ${JSON.stringify(j).replace(/'/g, '\\&#39;').replace(/"/g, '&quot;')});" style="width:100%;margin-top:10px;background:var(--surface);color:var(--text-secondary);border:1px solid var(--border);">← Back</button>
+            `);
+        } catch { showToast('Error loading job.', 'error'); }
+    }
+
+    async function afterJobMarkPaid(jobId) {
+        try {
+            await userRef('jobs').doc(jobId).update({ paymentStatus: 'paid', updatedAt: serverTimestamp() });
+            // Also mark any linked invoice as paid
+            const invSnap = await userRef('invoices').where('jobId', '==', jobId).get();
+            invSnap.forEach(async (d) => { await userRef('invoices').doc(d.id).update({ status: 'paid' }); });
+            showToast('Marked as paid!', 'success');
+            closeModal();
+            navigateTo('jobs');
+        } catch { showToast('Error marking paid.', 'error'); }
+    }
+
+    async function afterJobShare(jobId) {
+        try {
+            const doc = await userRef('jobs').doc(jobId).get();
+            const j = doc.data() || {};
+            const biz = APP.settings || {};
+            const text = `Invoice from ${biz.businessName || 'Mobile Service OS'}\nService: ${j.serviceType || 'N/A'}\nCustomer: ${j.customerName || 'N/A'}\nTotal: ${money(j.finalPrice)}\nDate: ${formatDate(j.createdAt)}\n\nThank you for your business!`;
+            if (navigator.share) {
+                await navigator.share({ title: 'Invoice', text });
+            } else {
+                await navigator.clipboard.writeText(text);
+                showToast('Invoice text copied!', 'success');
+            }
+        } catch { showToast('Share not available — text copied.', 'info'); }
+    }
+
+    async function afterJobFollowUp(jobId) {
+        try {
+            const doc = await userRef('jobs').doc(jobId).get();
+            const j = doc.data() || {};
+            closeModal();
+            openModal('Create Follow-Up', `
+                <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:12px;">Schedule a follow-up for <strong>${escHtml(j.customerName || 'this customer')}</strong>:</p>
+                <div class="form-group"><label>Follow-Up Date</label><input type="date" id="fuDate" value="${new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]}"></div>
+                <div class="form-group"><label>Notes</label><textarea id="fuNotes" rows="2" placeholder="e.g., Check on tire wear, offer seasonal service..."></textarea></div>
+                <div style="display:flex;gap:12px;">
+                    <button class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" style="flex:1;" onclick="saveFollowUp('${jobId}')"><span class="material-icons">save</span> Save</button>
+                </div>
+            `);
+        } catch { showToast('Error.', 'error'); }
+    }
+
+    async function saveFollowUp(jobId) {
+        const date = document.getElementById('fuDate')?.value;
+        const notes = document.getElementById('fuNotes')?.value?.trim();
+        if (!date) { showToast('Pick a date.', 'warning'); return; }
+        try {
+            const doc = await userRef('jobs').doc(jobId).get();
+            const j = doc.data() || {};
+            await userRef('jobs').add({
+                serviceType: j.serviceType || '',
+                customerName: j.customerName || '',
+                customerPhone: j.customerPhone || '',
+                vehicleType: j.vehicleType || '',
+                location: j.location || '',
+                status: 'scheduled',
+                source: 'follow-up',
+                notes: `Follow-up from ${formatDate(j.createdAt)}${notes ? ': ' + notes : ''}`,
+                followUpDate: date,
+                followUpFromJob: jobId,
+                createdAt: serverTimestamp()
+            });
+            closeModal();
+            showToast('Follow-up created!', 'success');
+            navigateTo('jobs');
+        } catch { showToast('Error creating follow-up.', 'error'); }
     }
 
     async function deleteJob(id) {
@@ -3865,9 +4167,10 @@
                 ${inv.notes ? `<p style="margin-top:12px;color:var(--text-secondary);font-size:0.875rem;">${escHtml(inv.notes)}</p>` : ''}
                 <p style="margin-top:20px;text-align:center;color:var(--text-tertiary);font-size:0.8rem;">${escHtml(biz.invoiceFooter || 'Thank you for your business!')}</p>
             </div>`,
-            `<button class="btn btn-secondary" onclick="toggleInvoiceStatus('${inv.id}','${inv.status}')"><span class="material-icons">${inv.status === 'paid' ? 'money_off' : 'payments'}</span> ${inv.status === 'paid' ? 'Mark Unpaid' : 'Mark Paid'}</button>
-            <button class="btn btn-secondary" onclick="printInvoice()"><span class="material-icons">print</span> Print</button>
+            `<button class="btn btn-primary" onclick="generateInvoicePDF('${inv.id}')"><span class="material-icons">picture_as_pdf</span> PDF</button>
+            <button class="btn btn-secondary" onclick="toggleInvoiceStatus('${inv.id}','${inv.status}')"><span class="material-icons">${inv.status === 'paid' ? 'money_off' : 'payments'}</span> ${inv.status === 'paid' ? 'Unpaid' : 'Paid'}</button>
             <button class="btn btn-secondary" onclick="copyInvoiceText('${inv.id}')"><span class="material-icons">content_copy</span> Copy</button>
+            <button class="btn btn-secondary" onclick="shareInvoicePDF('${inv.id}')"><span class="material-icons">share</span></button>
             <button class="btn btn-danger" onclick="deleteInvoice('${inv.id}')"><span class="material-icons">delete</span></button>`);
     }
 
@@ -3882,6 +4185,204 @@
     }
 
     function printInvoice() { window.print(); }
+
+    async function generateInvoicePDF(id) {
+        try {
+            showLoading();
+            const doc = await userRef('invoices').doc(id).get();
+            if (!doc.exists()) { hideLoading(); showToast('Invoice not found.', 'error'); return; }
+            const inv = doc.data();
+            const biz = APP.settings || {};
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+            const pw = pdf.internal.pageSize.getWidth();
+            const margin = 20;
+            let y = 20;
+
+            // ─── Logo ───
+            if (biz.logoUrl) {
+                try {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = biz.logoUrl;
+                    });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    const logoData = canvas.toDataURL('image/png');
+                    const logoH = 18;
+                    const logoW = (img.naturalWidth / img.naturalHeight) * logoH;
+                    pdf.addImage(logoData, 'PNG', (pw - logoW) / 2, y, logoW, logoH);
+                    y += logoH + 4;
+                } catch { /* skip logo if CORS fails */ }
+            }
+
+            // ─── Business Header ───
+            pdf.setFontSize(18);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(37, 99, 235); // brand blue
+            pdf.text(biz.businessName || 'Mobile Service OS', pw / 2, y, { align: 'center' });
+            y += 7;
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(100, 100, 100);
+            const contactParts = [biz.phone, biz.email, biz.address].filter(Boolean);
+            if (contactParts.length) {
+                pdf.text(contactParts.join('  ·  '), pw / 2, y, { align: 'center' });
+                y += 5;
+            }
+
+            // ─── Divider ───
+            y += 3;
+            pdf.setDrawColor(37, 99, 235);
+            pdf.setLineWidth(0.8);
+            pdf.line(margin, y, pw - margin, y);
+            y += 8;
+
+            // ─── Invoice Title & Details ───
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(30, 30, 30);
+            pdf.text('INVOICE', margin, y);
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(80, 80, 80);
+            pdf.text('#' + (inv.invoiceNumber || ''), margin + 28, y);
+
+            // Status badge
+            const statusText = (inv.status || 'unpaid').toUpperCase();
+            const statusColor = inv.status === 'paid' ? [34, 197, 94] : [245, 158, 11];
+            pdf.setFillColor(...statusColor);
+            const stW = pdf.getTextWidth(statusText) + 8;
+            pdf.roundedRect(pw - margin - stW, y - 5, stW, 7, 2, 2, 'F');
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(255, 255, 255);
+            pdf.text(statusText, pw - margin - stW + 4, y - 0.5);
+            y += 8;
+
+            // Date
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(100, 100, 100);
+            pdf.text('Date: ' + formatDate(inv.createdAt), margin, y);
+            y += 10;
+
+            // ─── Bill To ───
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(37, 99, 235);
+            pdf.text('BILL TO', margin, y);
+            y += 6;
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(30, 30, 30);
+            pdf.setFontSize(11);
+            pdf.text(inv.customerName || '—', margin, y);
+            y += 5;
+            if (inv.customerPhone) {
+                pdf.setFontSize(9);
+                pdf.setTextColor(80, 80, 80);
+                pdf.text(inv.customerPhone, margin, y);
+                y += 5;
+            }
+            y += 6;
+
+            // ─── Line Items Table ───
+            const tableX = margin;
+            const colW = [pw - 2 * margin - 45, 45]; // description, amount
+            // Header row
+            pdf.setFillColor(37, 99, 235);
+            pdf.rect(tableX, y, colW[0] + colW[1], 8, 'F');
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(255, 255, 255);
+            pdf.text('Description', tableX + 4, y + 5.5);
+            pdf.text('Amount', tableX + colW[0] + colW[1] - 4, y + 5.5, { align: 'right' });
+            y += 8;
+
+            // Item rows
+            pdf.setTextColor(30, 30, 30);
+            pdf.setFont('helvetica', 'normal');
+            const items = [];
+            if (inv.serviceType) items.push({ desc: inv.serviceType, amt: null });
+            if (inv.location) items.push({ desc: 'Location: ' + inv.location, amt: null });
+            if (inv.tireSize) items.push({ desc: 'Tire: ' + inv.tireSize, amt: null });
+            if (inv.materialCost > 0) items.push({ desc: 'Materials / Parts', amt: money(inv.materialCost) });
+
+            // If no line items, just show the service as one line
+            if (items.length === 0) items.push({ desc: 'Service', amt: null });
+
+            items.forEach((item, i) => {
+                const fill = i % 2 === 0;
+                if (fill) { pdf.setFillColor(245, 247, 250); pdf.rect(tableX, y, colW[0] + colW[1], 7, 'F'); }
+                pdf.setFontSize(9);
+                pdf.text(item.desc, tableX + 4, y + 5);
+                if (item.amt) pdf.text(item.amt, tableX + colW[0] + colW[1] - 4, y + 5, { align: 'right' });
+                y += 7;
+            });
+
+            // Total row
+            y += 2;
+            pdf.setDrawColor(200, 200, 200);
+            pdf.line(tableX + colW[0] - 20, y, tableX + colW[0] + colW[1], y);
+            y += 6;
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(30, 30, 30);
+            pdf.text('Total Due:', tableX + colW[0] - 20, y);
+            pdf.setTextColor(34, 197, 94);
+            pdf.text(money(inv.amount), tableX + colW[0] + colW[1] - 4, y, { align: 'right' });
+            y += 12;
+
+            // ─── Notes ───
+            if (inv.notes) {
+                pdf.setFontSize(9);
+                pdf.setFont('helvetica', 'italic');
+                pdf.setTextColor(100, 100, 100);
+                pdf.text('Notes: ' + inv.notes, margin, y, { maxWidth: pw - 2 * margin });
+                y += 10;
+            }
+
+            // ─── Footer ───
+            const footerY = pdf.internal.pageSize.getHeight() - 15;
+            pdf.setDrawColor(200, 200, 200);
+            pdf.line(margin, footerY - 5, pw - margin, footerY - 5);
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(140, 140, 140);
+            pdf.text(biz.invoiceFooter || 'Thank you for your business!', pw / 2, footerY, { align: 'center' });
+
+            // ─── Save / Download ───
+            const fileName = `Invoice_${inv.invoiceNumber || 'draft'}.pdf`;
+            pdf.save(fileName);
+            hideLoading();
+            showToast('Invoice PDF downloaded!', 'success');
+        } catch (err) {
+            hideLoading();
+            console.error('PDF generation error:', err);
+            showToast('Error generating PDF. Make sure you have internet connection.', 'error');
+        }
+    }
+
+    async function shareInvoicePDF(id) {
+        try {
+            const doc = await userRef('invoices').doc(id).get();
+            if (!doc.exists()) return;
+            const inv = doc.data();
+            const biz = APP.settings || {};
+            const text = `INVOICE #${inv.invoiceNumber}\nFrom: ${biz.businessName || 'Mobile Service OS'}\nTo: ${inv.customerName || ''}\nService: ${inv.serviceType || ''}\nTotal: ${money(inv.amount)}\nStatus: ${(inv.status || 'unpaid').toUpperCase()}\nDate: ${formatDate(inv.createdAt)}\n\n${biz.invoiceFooter || 'Thank you for your business!'}`;
+            if (navigator.share) {
+                await navigator.share({ title: `Invoice ${inv.invoiceNumber}`, text });
+            } else {
+                await navigator.clipboard.writeText(text);
+                showToast('Invoice copied to clipboard!', 'success');
+            }
+        } catch { showToast('Share not available.', 'info'); }
+    }
 
     async function copyInvoiceText(id) {
         const doc = await userRef('invoices').doc(id).get();
@@ -3945,6 +4446,11 @@
         <div class="view-container">
             <div class="view-header"><h2>More</h2></div>
             <div style="display:flex;flex-direction:column;gap:10px;">
+                <div class="card list-item" style="cursor:pointer;" onclick="navigateTo('services')">
+                    <span class="material-icons" style="color:var(--accent);margin-right:12px;">miscellaneous_services</span>
+                    <span style="font-weight:600;">Services</span>
+                    <span class="material-icons" style="margin-left:auto;color:var(--text-tertiary);">chevron_right</span>
+                </div>
                 <div class="card list-item" style="cursor:pointer;" onclick="navigateTo('inventory')">
                     <span class="material-icons" style="color:var(--primary);margin-right:12px;">inventory_2</span>
                     <span style="font-weight:600;">Inventory</span>
@@ -4309,6 +4815,13 @@
         generateReviewRequest, copyReviewMsg, shareReviewMsg,
         // Settings
         saveSettings, addNewService, removeService, exportData,
+        // Dashboard Quick Quote
+        dashQuickToJob,
+        // After-Job Actions
+        showAfterJobActions, afterJobInvoice, afterJobReview,
+        afterJobMarkPaid, afterJobShare, afterJobFollowUp, saveFollowUp,
+        // Invoice PDF
+        generateInvoicePDF, shareInvoicePDF,
     });
 
     // ─── App Init Complete ──────────────────────────────────────────────
